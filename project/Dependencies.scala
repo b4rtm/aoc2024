@@ -1,5 +1,3 @@
-package project
-
 import sbt.*
 
 object Dependencies {
