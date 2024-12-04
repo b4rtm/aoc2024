@@ -8,6 +8,7 @@ object Day2 extends Exercise(2024,2){
   def run(input: List[String]): Unit = {
     val inputData = prepInput(input)
     part1(calculateSafeReports(inputData))
+    part2(calculateSafeReportsIncludingToleration(inputData))
   }
 
   private def prepInput(input: List[String]): List[List[Int]] = input.map(_.split(" ").map(_.toInt).toList)
@@ -16,7 +17,24 @@ object Day2 extends Exercise(2024,2){
     reports.count(report => isReportSafe(report))
   }
 
-  private def isReportSafe(levels: List[Int]): Boolean = {
+  private def calculateSafeReportsIncludingToleration(reports: List[List[Int]]): Int = {
+    reports.count(report => isReportSafeWithDampener(report))
+  }
+
+  private def isReportSafeWithDampener(levels: List[Int]): Boolean = {
+    if (isReportSafe(levels)) return true
+
+    for (i <- levels.indices) {
+      val modifiedLevels = levels.take(i) ++ levels.drop(i + 1)
+      if(isReportSafe(modifiedLevels)){
+        return true
+      }
+    }
+    false
+  }
+
+
+    private def isReportSafe(levels: List[Int]): Boolean = {
     @tailrec
     def safetyHelper(counter: Int, isIncreasing: Boolean): Boolean = {
       if(counter >= levels.length - 1) true
@@ -29,6 +47,6 @@ object Day2 extends Exercise(2024,2){
       }
     }
     safetyHelper(0, levels.head < levels(1))
-
   }
+
 }
