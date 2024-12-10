@@ -6,7 +6,8 @@ object Day7 extends Exercise(2024, 7) {
   def run(input: List[String]): Unit = {
 
     val inputData = prepareData(input)
-    part1(calculateTotalCalibrationResult(inputData))
+//    part1(calculateTotalCalibrationResult(inputData, List("+", "*")))
+    part2(calculateTotalCalibrationResult(inputData, List("+", "*", "|")))
   }
 
   private def prepareData(input: List[String]): List[(Long, List[Long])] = {
@@ -24,48 +25,35 @@ object Day7 extends Exercise(2024, 7) {
       operators(i) match {
         case '+' => result += list(i + 1)
         case '*' => result *= list(i + 1)
+        case '|' => result = (result.toString + list(i + 1).toString).toLong
       }
     }
     result
   }
 
-  private def checkEquation(result: Long, list: List[Long]): Boolean = {
-    val listOfOperators = generateCombinations(list.length - 1)
+  private def checkEquation(result: Long, list: List[Long], operators: List[String]): Boolean = {
+    val n = list.length - 1
+    val totalCombinations = Math.pow(operators.size, n).toInt
 
-    @tailrec
-    def checkEquationHelper(remaining: Int): Boolean = {
-      if(remaining == 0) false
-      else {
-        val operators = listOfOperators(remaining - 1)
+    for (i <- 0 until totalCombinations) {
+      var currentOperators = ""
 
-        if (calculateEquation(list, operators) == result) true
-        else checkEquationHelper(remaining - 1)
-      }
-    }
-    checkEquationHelper(listOfOperators.length)
-  }
-
-  private def generateCombinations(n: Int): List[String] = {
-    var results = List[String]()
-
-    for (i <- 0 until Math.pow(2, n).toInt) {
-      var current = ""
       var temp = i
-
       for (j <- 0 until n) {
-        if (temp % 2 == 0) {
-          current += "+"
-        } else {
-          current += "*"
-        }
-        temp = temp / 2
+        val operatorIndex = temp % operators.size
+        currentOperators += operators(operatorIndex)
+        temp = temp / operators.size
       }
-      results = results :+ current
+
+      if (calculateEquation(list, currentOperators) == result) {
+        return true
+      }
     }
-    results
+
+    false
   }
 
-  private def calculateTotalCalibrationResult(input: List[(Long, List[Long])]): Long = {
-    input.filter(equation => checkEquation(equation._1, equation._2)).map(equation => equation._1).sum
+  private def calculateTotalCalibrationResult(input: List[(Long, List[Long])], operators: List[String]): Long = {
+    input.filter(equation => checkEquation(equation._1, equation._2, operators)).map(equation => equation._1).sum
   }
 }
